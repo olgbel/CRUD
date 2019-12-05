@@ -23,6 +23,7 @@ class ApplicationTest {
 
     @Test
     fun testAdd() {
+        println(jsonContentType.toString())
         withTestApplication({ module() }) {
             with(handleRequest(HttpMethod.Post, "/api/v1/posts") {
                 addHeader(HttpHeaders.ContentType, jsonContentType.toString())

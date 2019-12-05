@@ -8,7 +8,11 @@ data class PostResponseDto(val id: Long,
                            val content: String? = null,
                            val created: Int,
                            val likes: Int = 0,
-                           val postType: PostType = PostType.POST) {
+                           val reposts: Int = 0,
+                           val postType: PostType = PostType.POST,
+                           val youtubeURL: String? = null,
+                           val address: String? = null,
+                           val coordinates: Pair<Double, Double>? = null) {
     companion object {
         fun fromModel(model: PostModel) = PostResponseDto(
             id = model.id,
@@ -16,7 +20,11 @@ data class PostResponseDto(val id: Long,
             content = model.content,
             created = model.created,
             likes = model.likes,
-            postType = model.postType
+            reposts = model.reposts,
+            postType = model.postType,
+            youtubeURL = model.youtubeURL,
+            address = model.address,
+            coordinates = model.coordinates
         )
     }
 }
