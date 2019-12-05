@@ -11,7 +11,9 @@ import org.kodein.di.ktor.kodein
 import ru.netology.dto.PostRequestDto
 import ru.netology.dto.PostResponseDto
 import ru.netology.model.PostModel
+import ru.netology.model.PostType
 import ru.netology.repository.PostRepository
+import java.util.*
 
 fun Routing.v1() {
     route("/api/v1/posts") {
@@ -28,13 +30,48 @@ fun Routing.v1() {
         }
         post {
             val input = call.receive<PostRequestDto>()
-            val model = PostModel(id = input.id, author = input.author, content = input.content)
+            val model: PostModel
+            model = if (!input.address.isNullOrEmpty() && input.coordinates != null){
+                PostModel(id = input.id, author = input.author, content = input.content, address = input.address, coordinates = input.coordinates, postType = PostType.EVENT)
+            }
+            else if (!input.youtubeURL.isNullOrEmpty()){
+                PostModel(id = input.id, author = input.author, content = input.content, youtubeURL = input.youtubeURL)
+            }
+            else {
+                PostModel(id = input.id, author = input.author, content = input.content, postType = PostType.MEDIA)
+            }
             val response = PostResponseDto.fromModel(repo.save(model))
             call.respond(response)
         }
         delete("/{id}") {
             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
             val response = repo.removeById(id)
+            call.respond(response)
+        }
+        post("/like/{id}") {
+            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
+            val response = PostResponseDto.fromModel(repo.likeById(id)!!)
+            call.respond(response)
+        }
+        post("/dislike/{id}") {
+            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
+            val response = PostResponseDto.fromModel(repo.dislikeById(id)!!)
+            call.respond(response)
+        }
+        post("/repost/{id}"){
+            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
+            val existingPost = repo.getById(id)!!
+            repo.save(existingPost.copy(reposts = existingPost.reposts + 1))
+
+            val model = PostModel(
+                id = -1,
+                author = "me",
+                content = "",
+                postType = PostType.REPOST,
+                repostId = id,
+                created = Date().time.toInt()
+                )
+            val response = PostResponseDto.fromModel(repo.save(model))
             call.respond(response)
         }
     }
