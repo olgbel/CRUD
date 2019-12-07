@@ -1,0 +1,1 @@
+web: ./build/install/CRUD/bin/CRUD
