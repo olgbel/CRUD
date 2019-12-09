@@ -8,7 +8,7 @@ data class PostModel(
     val likes: Int = 0,
     val reposts: Int = 0,
     val postType: PostType = PostType.POST,
-    val repostId: Long? = null,
+    val sourceID: Long? = null,
     val youtubeURL: String? = null,
     val address: String? = null,
     val coordinates: Pair<Double, Double>? = null

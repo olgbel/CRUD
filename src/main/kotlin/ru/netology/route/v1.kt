@@ -32,13 +32,13 @@ fun Routing.v1() {
             val input = call.receive<PostRequestDto>()
             val model: PostModel
             model = if (!input.address.isNullOrEmpty() && input.coordinates != null){
-                PostModel(id = input.id, author = input.author, content = input.content, address = input.address, coordinates = input.coordinates, postType = PostType.EVENT)
+                PostModel(id = -1, author = input.author, content = input.content, address = input.address, coordinates = input.coordinates, postType = PostType.EVENT)
             }
             else if (!input.youtubeURL.isNullOrEmpty()){
-                PostModel(id = input.id, author = input.author, content = input.content, youtubeURL = input.youtubeURL)
+                PostModel(id = -1, author = input.author, content = input.content, youtubeURL = input.youtubeURL, postType = PostType.MEDIA)
             }
             else {
-                PostModel(id = input.id, author = input.author, content = input.content, postType = PostType.MEDIA)
+                PostModel(id = -1, author = input.author, content = input.content)
             }
             val response = PostResponseDto.fromModel(repo.save(model))
             call.respond(response)
@@ -61,17 +61,18 @@ fun Routing.v1() {
         post("/repost/{id}"){
             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
             val existingPost = repo.getById(id)!!
-            repo.save(existingPost.copy(reposts = existingPost.reposts + 1))
+//            repo.save(existingPost.copy(reposts = existingPost.reposts + 1))
 
             val model = PostModel(
                 id = -1,
                 author = "me",
-                content = "",
+                content = existingPost.content,
                 postType = PostType.REPOST,
-                repostId = id,
-                created = Date().time.toInt()
+                sourceID = id,
+                created = (System.currentTimeMillis() / 1000).toInt()
                 )
-            val response = PostResponseDto.fromModel(repo.save(model))
+            val response: List<PostResponseDto> = listOf(PostResponseDto.fromModel(repo.save(model)),
+                PostResponseDto.fromModel(repo.save(existingPost.copy(reposts = existingPost.reposts + 1))))
             call.respond(response)
         }
     }

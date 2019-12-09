@@ -31,7 +31,7 @@ class PostRepositoryInMemoryWithMutexImpl : PostRepository {
                     copy
                 }
                 else -> {
-                    val oldItem = items[index].copy( content = item.content)
+                    val oldItem = items[index].copy( content = item.content, reposts = item.reposts)
                     items[index] = oldItem
                     oldItem
                 }
