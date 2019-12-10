@@ -1,1 +1,1 @@
-https://dashboard.heroku.com/apps/kotlincrud/
+https://kotlincrud.herokuapp.com/
